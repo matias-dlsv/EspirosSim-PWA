@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { PatronClinico } from "../utils/transformaciones";
 
 export interface ValoresMLS {
@@ -70,7 +71,9 @@ interface PacientState {
   getMejorPre: () => { fvc: number; fev1: number } | null;
 }
 
-export const usePacientStore = create<PacientState>((set, get) => ({
+export const usePacientStore = create<PacientState>()(
+  persist(
+    (set, get) => ({
   pacientes: [],
   pacienteSeleccionado: null,
   patronActivo: null,
@@ -144,4 +147,13 @@ export const usePacientStore = create<PacientState>((set, get) => ({
         nuevosPacientes.find((p) => p.id === pacienteId) || null;
       return { pacientes: nuevosPacientes, pacienteSeleccionado: nuevoSeleccionado };
     }),
-}));
+    }),
+    {
+      name: "espirosim:pacientes",
+      storage: createJSONStorage(() => localStorage),
+      // Solo persistimos la lista de pacientes — el paciente
+      // seleccionado y la fase actual son estado de navegación, no datos.
+      partialize: (state) => ({ pacientes: state.pacientes }),
+    }
+  )
+);

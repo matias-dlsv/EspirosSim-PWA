@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import { invoke } from "@tauri-apps/api/core";
+import { procesarNuevoPaciente } from "../utils/procesarPaciente";
 import {
   usePacientStore,
   Paciente,
@@ -55,18 +55,13 @@ function PacientForm({ onNavigate }: PacientFormProps) {
     const edadNum = Number(edad);
     const tallaNum = Number(talla);
     try {
-      const espirometriaDefault: DatosEspirometria = await invoke(
-        "procesar_nuevo_paciente",
-        {
-          datos: {
-            nombre,
-            edad: edadNum,
-            talla: tallaNum,
-            sexo,
-            raza,
-          },
-        },
-      );
+      const espirometriaDefault: DatosEspirometria = await procesarNuevoPaciente({
+        nombre,
+        edad: edadNum,
+        talla: tallaNum,
+        sexo,
+        raza,
+      });
       const nuevoPaciente: Paciente = {
         id: crypto.randomUUID(),
         nombre,

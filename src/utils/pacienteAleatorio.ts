@@ -2,7 +2,7 @@
 // GENERADOR DE PACIENTE ALEATORIO (solo en memoria)
 // ============================================================
 
-import { invoke } from "@tauri-apps/api/core";
+import { procesarNuevoPaciente } from "./procesarPaciente";
 import { Paciente, DatosEspirometria } from "../store/pacientStore";
 
 const NOMBRES_MASCULINOS = [
@@ -60,9 +60,8 @@ export const crearPacienteAleatorio = async (
     const raza = elegir(RAZAS);
     const talla = sexo === "Masculino" ? floatEntre(160, 190) : floatEntre(150, 175);
 
-    const espirometriaDefault: DatosEspirometria = await invoke(
-        "procesar_nuevo_paciente",
-        { datos: { nombre, edad, talla, sexo, raza } },
+    const espirometriaDefault: DatosEspirometria = await procesarNuevoPaciente(
+        { nombre, edad, talla, sexo, raza },
     );
 
     const nuevoPaciente: Paciente = {
