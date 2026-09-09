@@ -306,9 +306,6 @@ export default function Resultado({ onBack, onNavigate }: ResultadoProps) {
               <tr>
                 <th>Variable</th>
                 <th>Teo</th>
-                <th>
-                  <TooltipTerm term="LLN">LIN</TooltipTerm>
-                </th>
                 <th>Pre-BD</th>
                 <th>%Teo</th>
                 <th>
@@ -335,7 +332,6 @@ export default function Resultado({ onBack, onNavigate }: ResultadoProps) {
                   mls,
                   esRatio,
                 }) => {
-                  const lin = calcularLIN(mls.m, mls.l, mls.s);
                   const pctPre = teorico > 0 ? (real / teorico) * 100 : 0;
                   const pctPost =
                     realPost && teorico > 0 ? (realPost / teorico) * 100 : null;
@@ -363,9 +359,6 @@ export default function Resultado({ onBack, onNavigate }: ResultadoProps) {
                       </td>
                       <td className={styles.teoricoCell}>
                         {formatear(teorico, esRatio, unidad)}
-                      </td>
-                      <td className={styles.teoricoCell}>
-                        {isNaN(lin) ? "—" : formatear(lin, esRatio, unidad)}
                       </td>
                       <td className={styles.realCell}>
                         {formatear(real, esRatio, unidad)}
@@ -416,9 +409,8 @@ export default function Resultado({ onBack, onNavigate }: ResultadoProps) {
                     <TooltipTerm term="PEF" />
                   </td>
                   <td className={styles.teoricoCell}>—</td>
-                  <td className={styles.teoricoCell}>—</td>
                   <td className={styles.realCell}>{pefPre.toFixed(2)} L/s</td>
-                  <td>—</td>
+                  <td className={styles.teoricoCell}>—</td>
                   <td>—</td>
                   {hayPost && (
                     <td className={styles.postCell}>

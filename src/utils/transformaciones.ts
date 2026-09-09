@@ -341,14 +341,51 @@ export const generarIndicesAleatorios = (
         ? Math.random() < 0.5 ? RESTRICTIVO_LEVE : RESTRICTIVO_MODERADO
         : NORMAL;
 
-const fvcVal  = yDesdeZ(zAleatorio(rangos.fvc.min,  rangos.fvc.max),  mls.fvc);
-const fev1Val = yDesdeZ(zAleatorio(rangos.fev1.min, rangos.fev1.max), mls.fev1);
+  // FVC y FEV1 se samplean independientes dentro de sus rangos (esto es lo
+  // que hace que la severidad calce bien en Resultado.tsx, porque esos
+  // rangos ya están calibrados contra los umbrales de severidad).
+  // Pero el ratio resultante (fev1/fvc) puede caer, por azar, del lado
+  // equivocado del LIN (-1.645) aunque ambos valores individuales estén
+  // "bien" — eso es lo que causaba pacientes "Normal" identificados como
+  // Obstructivo. Por eso se reintenta hasta que la clasificación real
+  // (misma lógica que esPatronCorrecto en Resultado.tsx) coincida con el
+  // patrón que se pidió generar.
+  const esperaObstruccion = !!patron?.obstruccion && !patron?.restriccion;
+  const esperaRestriccion = !!patron?.restriccion && !patron?.obstruccion;
 
-return {
-  fvc:     fvcVal,
-  fev1:    fev1Val,
-  fev1fvc: fev1Val / fvcVal,  // ← derivado, nunca generado aparte
-};
+  const LLN_Z = -1.645;
+  const zScore = (yObs: number, m: number, l: number, s: number): number => {
+    if (m <= 0 || s <= 0) return NaN;
+    if (Math.abs(l) < 1e-10) return Math.log(yObs / m) / s;
+    return (Math.pow(yObs / m, l) - 1) / (l * s);
+  };
+
+  const MAX_INTENTOS = 60;
+  let fvcVal = 0;
+  let fev1Val = 0;
+
+  for (let intento = 0; intento < MAX_INTENTOS; intento++) {
+    fvcVal  = yDesdeZ(zAleatorio(rangos.fvc.min,  rangos.fvc.max),  mls.fvc);
+    fev1Val = yDesdeZ(zAleatorio(rangos.fev1.min, rangos.fev1.max), mls.fev1);
+    const ratioVal = fev1Val / fvcVal;
+
+    const zFvc   = zScore(fvcVal,   mls.fvc.m,     mls.fvc.l,     mls.fvc.s);
+    const zRatio = zScore(ratioVal, mls.fev1fvc.m, mls.fev1fvc.l, mls.fev1fvc.s);
+    const esObstructivo = zRatio < LLN_Z;
+    const esRestrictivo = !esObstructivo && zFvc < LLN_Z;
+    const esNormal      = !esObstructivo && !esRestrictivo;
+
+    const coincide = esperaObstruccion ? esObstructivo
+                    : esperaRestriccion ? esRestrictivo
+                    : esNormal;
+    if (coincide) break;
+  }
+
+  return {
+    fvc:     fvcVal,
+    fev1:    fev1Val,
+    fev1fvc: fev1Val / fvcVal,
+  };
 };
 
 // ============================================================

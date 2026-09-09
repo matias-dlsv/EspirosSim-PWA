@@ -38,6 +38,9 @@ export default function CasosClinicos({ onBack, onNavigate }: Props) {
     (state) => state.seleccionarPaciente,
   );
   const pacientes = usePacientStore((state) => state.pacientes);
+  const setOrigenCasoClinico = usePacientStore(
+    (state) => state.setOrigenCasoClinico,
+  );
 
   const [cargando, setCargando] = useState(false);
   const [casoSeleccionado, setCasoSeleccionado] = useState<number | null>(null);
@@ -55,6 +58,7 @@ export default function CasosClinicos({ onBack, onNavigate }: Props) {
       );
 
       setPatron(CASOS_CLINICOS[indice]);
+      setOrigenCasoClinico(true);
 
       toast.success(`Paciente: ${paciente.nombre}`, {
         duration: 2500,
