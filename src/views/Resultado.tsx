@@ -26,12 +26,6 @@ const calcularZScore = (
   return (Math.pow(yObs / m, l) - 1) / (l * s);
 };
 
-const calcularLIN = (m: number, l: number, s: number): number => {
-  if (m <= 0 || s <= 0) return NaN;
-  if (Math.abs(l) < 1e-10) return m * Math.exp(-1.645 * s);
-  return m * Math.pow(1 + l * s * -1.645, 1 / l);
-};
-
 // ============================================================
 // HELPERS EVALUACIÓN
 // ============================================================
